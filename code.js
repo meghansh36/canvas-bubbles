@@ -11,7 +11,7 @@ var mouse = {
     x: undefined,
     y:undefined
 }
-var maxradius = 40; //maxradius of the bubbles
+var maxradius = (canvas.width < 1000) ? 200 : 40 ; //maxradius of the bubbles
 
 //CLASS FOR BUBBLES 
 function Circle(x,y,dx,dy,radius)
@@ -46,7 +46,7 @@ function Circle(x,y,dx,dy,radius)
         //////////////////////////////////////////////
         
         //code to handle the increase in bubble size on mouse hover
-        if((mouse.x - this.x) < 80 && (mouse.x - this.x)> -80 && (mouse.y - this.y) < 80 && (mouse.y - this.y)> -80){
+        if((mouse.x - this.x) < 80 && (mouse.x - this.x)> -80 && (mouse.y - this.y) < 80 && (mouse.y - this.y)> -80 && isTouchDown){
             if(this.radius<maxradius){
             this.radius +=2;}
         }
@@ -61,13 +61,30 @@ function Circle(x,y,dx,dy,radius)
 
 
 var circlearray = [];  //array to store all the circle objects
-
+var isTouchDown = true;
 window.addEventListener('mousemove',function(event){
 
         
         mouse.x = event.x;
         mouse.y = event.y;
+        isTouchDown = true;
 })
+
+window.addEventListener('touchstart',function(event){
+            mouse.x = parseInt(event.changedTouches[0].clientX);
+            mouse.y = parseInt(event.changedTouches[0].clientY);
+            isTouchDown = true;
+        })
+
+        window.addEventListener('touchend',function(){
+            isTouchDown = false;
+        })
+
+        window.addEventListener('touchmove',function(event){
+            mouse.x = parseInt(event.changedTouches[0].clientX);
+            mouse.y = parseInt(event.changedTouches[0].clientY);
+            isTouchDown = true;
+        })
 
 window.addEventListener('resize',function(event){
     
@@ -81,16 +98,35 @@ window.addEventListener('resize',function(event){
 function init()
 
 {   circlearray = [];
-    for(var i =0 ; i<1000 ; i++)
+   
+    if(canvas.width < 1000)
+        {
+            for(var i =0 ; i<500 ; i++)
+            {
+                var radius = Math.floor((Math.random()*10)+1);
+                var x = (Math.random()*(innerWidth-2*radius))+radius;
+                var y = (Math.random()*(innerHeight-2*radius))+radius;
+                var dx = (Math.random()-0.5)*8;
+                var dy = (Math.random()-0.5)*8;
+
+                circlearray.push(new Circle(x,y,dx,dy,radius));
+            } 
+        }
+ else
     {
-        var radius = Math.floor((Math.random()*3)+1);
-        var x = (Math.random()*(innerWidth-2*radius))+radius;
-        var y = (Math.random()*(innerHeight-2*radius))+radius;
-        var dx = (Math.random()-0.5)*8;
-        var dy = (Math.random()-0.5)*8;
-        
-        circlearray.push(new Circle(x,y,dx,dy,radius));
-    }}
+        for(var i =0 ; i<1000 ; i++)
+        {
+            var radius = Math.floor((Math.random()*3)+1);
+            var x = (Math.random()*(innerWidth-2*radius))+radius;
+            var y = (Math.random()*(innerHeight-2*radius))+radius;
+            var dx = (Math.random()-0.5)*8;
+            var dy = (Math.random()-0.5)*8;
+
+            circlearray.push(new Circle(x,y,dx,dy,radius));
+        }
+    
+    }
+}
 
 
 
@@ -100,7 +136,7 @@ function animate()
     requestAnimationFrame(animate);  
     c.clearRect(0,0,innerWidth,innerHeight);
     for(var i =0; i<circlearray.length; i++)
-        {
+        {   
             circlearray[i].update();
         }
 
